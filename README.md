@@ -1,5 +1,7 @@
 # 🪙 Home Assistant Crypto Ticker
 
+[🇬🇧 English](README.md) | [🇨🇿 Čeština](README_CZ.md)
+
 A stylish **crypto ticker** for displaying live cryptocurrency prices directly from **Home Assistant**.  
 It runs in your browser and fetches values from entities like `sensor.crypto_*` via the **Home Assistant REST API**.
 
