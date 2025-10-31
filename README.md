@@ -39,8 +39,21 @@ Values are fetched via the **Home Assistant REST API** (`/api/states/...`).
 
 2. Save the file as `crypto-ticker.html`.
 
-3. Open it in a browser or embed it in your Home Assistant dashboard  
-   (for example using `panel_custom` or `browser_mod`).
+3. Copy it to `/config/www/` folder
+
+## Configuration
+
+### Basic Configuration
+
+```yaml
+type: iframe
+url: /local/crypto_ticker.html
+grid_options:
+  rows: 2
+  columns: full
+aspect_ratio: "10" 
+```
+
 
 ---
 
