@@ -18,6 +18,10 @@ It runs in your browser and fetches values from entities like `sensor.crypto_*` 
 
 ## ⚙️ How It Works
 The ticker reads entities of this type:  
+
+
+https://github.com/heyajohnny/cryptoinfo
+
 ```
 sensor.crypto_bitcoin
 sensor.crypto_ethereum
@@ -26,6 +30,8 @@ sensor.crypto_kava
 ```
 Each entity must include attributes `change_24h` and `symbol`.  
 Values are fetched via the **Home Assistant REST API** (`/api/states/...`).
+
+
 
 ---
 
