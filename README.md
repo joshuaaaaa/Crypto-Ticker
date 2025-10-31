@@ -81,7 +81,8 @@ Default list of supported coins (you can expand it in the `COINS` array):
 ---
 
 ## 📷 Preview
-*(You can later add a GIF or screenshot of your running ticker here.)*
+![Animace](https://github.com/user-attachments/assets/6946fd2f-0dbd-4b24-bde1-49bce5ad1bd5)
+
 
 ---
 
@@ -90,3 +91,9 @@ Default list of supported coins (you can expand it in the `COINS` array):
 Created for the Home Assistant community ❤️  
 
 🔗 [https://github.com/joshuaaaaa](https://github.com/joshuaaaaa)
+
+## http://buymeacoffee.com/jakubhruby
+
+
+<img width="150" height="150" alt="qr-code" src="https://github.com/user-attachments/assets/2581bf36-7f7d-4745-b792-d1abaca6e57d" />
+
