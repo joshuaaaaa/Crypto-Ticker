@@ -7,6 +7,13 @@ It runs in your browser and fetches values from entities like `sensor.crypto_*` 
 
 ---
 
+## 📷 Preview
+![Animace](https://github.com/user-attachments/assets/6946fd2f-0dbd-4b24-bde1-49bce5ad1bd5)
+
+
+---
+---
+
 ## ✨ Features
 - 🔁 Automatic updates from Home Assistant (every 10 seconds)  
 - 📉 Shows price and 24h change (%)  
@@ -84,10 +91,6 @@ Default list of supported coins (you can expand it in the `COINS` array):
   { ha_name: 'mycoin', icon: '💰', name: 'MyCoin' }
   ```
 
----
-
-## 📷 Preview
-![Animace](https://github.com/user-attachments/assets/6946fd2f-0dbd-4b24-bde1-49bce5ad1bd5)
 
 
 ---
