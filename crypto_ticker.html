@@ -321,8 +321,22 @@
 
  <script>
     // ==================== KONFIGURACE ====================
-    const HA_URL = "http://192.168.1.1:8123"; // Tvoje IP Home Assistant
+
+    // 1. URL ADRESA HOME ASSISTANT
+    // Změňte na IP adresu vašeho Home Assistant serveru
+    // Příklady: "http://192.168.1.100:8123" nebo "http://homeassistant.local:8123"
+    const HA_URL = "http://192.168.1.1:8123";
+
+    // 2. LONG-LIVED ACCESS TOKEN
+    // Jak získat token:
+    // 1) V Home Assistant klikněte na váš profil (vlevo dole)
+    // 2) Scrollujte dolů na sekci "Long-Lived Access Tokens"
+    // 3) Klikněte "Create Token"
+    // 4) Pojmenujte token (např. "Crypto Ticker")
+    // 5) Zkopírujte vygenerovaný token a vložte níže (mezi uvozovky)
     const HA_TOKEN = "Tvoje dlouhodobé API token";
+
+    // 3. DALŠÍ NASTAVENÍ
     const UPDATE_INTERVAL = 10000; // Aktualizace každých 10 sekund (ms)
     const SCROLL_SPEED = 60; // Rychlost scrollování v sekundách (vyšší = pomalejší)
     const MAX_RETRIES = 3; // Maximální počet pokusů při chybě
@@ -466,9 +480,22 @@
     }
 
     async function fetchHAData() {
+        // Kontrola konfigurace před načítáním
+        if (HA_URL === "http://192.168.1.1:8123") {
+            console.error('⚠️ VAROVÁNÍ: HA_URL je stále na výchozí hodnotě. Změňte ji na IP adresu vašeho Home Assistant!');
+            updateStatus('error', 'Chyba konfigurace - zkontrolujte HA_URL');
+        }
+
+        if (HA_TOKEN === "Tvoje dlouhodobé API token") {
+            console.error('⚠️ VAROVÁNÍ: HA_TOKEN není nastaven. Vložte svůj Long-Lived Access Token!');
+            updateStatus('error', 'Chyba konfigurace - zkontrolujte HA_TOKEN');
+        }
+
         try {
             updateStatus('loading', 'Načítám data...');
             const data = [];
+            let authError = false;
+            let firstErrorLogged = false;
 
             for (const coin of COINS) {
                 const entity_id = `sensor.crypto_${coin.ha_name}`;
@@ -492,24 +519,71 @@
                             symbol: state.attributes.symbol || coin.ha_name.toUpperCase()
                         });
                     } else {
-                        console.warn(`❌ Sensor ${entity_id} nenalezen (status: ${response.status})`);
+                        // Detailní chybové zprávy podle HTTP status kódu
+                        if (!firstErrorLogged) {
+                            if (response.status === 401) {
+                                console.error('🔐 CHYBA AUTENTIZACE (401): Neplatný nebo chybějící token!');
+                                console.error('➡️ Zkontrolujte, zda:');
+                                console.error('   1. Máte správný Long-Lived Access Token z Home Assistant');
+                                console.error('   2. Token není expirovaný');
+                                console.error('   3. Token je správně zkopírovaný (bez mezer)');
+                                updateStatus('error', 'Chyba autentizace - neplatný token');
+                                authError = true;
+                            } else if (response.status === 403) {
+                                console.error('🚫 CHYBA OPRÁVNĚNÍ (403): Token nemá dostatečná oprávnění!');
+                                updateStatus('error', 'Chyba oprávnění');
+                                authError = true;
+                            } else if (response.status === 404) {
+                                console.warn(`❌ Sensor ${entity_id} nenalezen (404) - zkontrolujte, zda máte nainstalovanou integraci Crypto Info`);
+                            } else if (response.status >= 500) {
+                                console.error(`⚠️ CHYBA SERVERU (${response.status}): Home Assistant server má problém`);
+                                updateStatus('error', 'Chyba serveru HA');
+                            } else {
+                                console.warn(`❌ Sensor ${entity_id} - HTTP status: ${response.status}`);
+                            }
+                            firstErrorLogged = true;
+                        }
                     }
                 } catch (error) {
-                    console.warn(`❌ Chyba při načítání ${entity_id}:`, error.message);
+                    if (!firstErrorLogged) {
+                        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                            console.error('🌐 CHYBA SÍTĚ: Nelze se připojit k Home Assistant');
+                            console.error('➡️ Zkontrolujte, zda:');
+                            console.error('   1. Home Assistant běží a je dostupný');
+                            console.error('   2. URL adresa je správná (zkuste otevřít v prohlížeči)');
+                            console.error('   3. Není blokováno firewallem');
+                            console.error('   4. CORS je správně nakonfigurován v Home Assistant');
+                            console.error(`   Aktuální URL: ${HA_URL}`);
+                            updateStatus('error', 'Chyba připojení k HA');
+                        } else {
+                            console.error(`❌ Neočekávaná chyba při načítání ${entity_id}:`, error.message);
+                        }
+                        firstErrorLogged = true;
+                    }
+                }
+
+                // Přerušit smyčku při autentizační chybě (nemá smysl zkoušet další)
+                if (authError) {
+                    console.error('⛔ Zastavuji načítání kvůli chybě autentizace');
+                    break;
                 }
             }
 
             if (data.length > 0) {
                 updateStatus('', 'Připojeno');
                 retryCount = 0;
+                console.log(`✅ Úspěšně načteno ${data.length} kryptoměn`);
             } else {
                 updateStatus('error', 'Žádná data');
+                if (!authError) {
+                    console.warn('⚠️ Žádné kryptoměny nebyly načteny. Zkontrolujte konzoli pro detaily.');
+                }
             }
 
             return data;
         } catch (error) {
-            console.error('💥 Chyba při načítání dat z HA:', error);
-            updateStatus('error', 'Chyba připojení');
+            console.error('💥 Kritická chyba při načítání dat z HA:', error);
+            updateStatus('error', 'Kritická chyba');
             retryCount++;
 
             if (retryCount < MAX_RETRIES) {
