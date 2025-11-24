@@ -19,66 +19,19 @@
 
         .ticker-container {
             width: 100%;
-            height: 90px;
+            height: 70px;
             background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%);
             overflow: hidden;
             position: relative;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .ticker-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 16px;
-            background: rgba(0, 0, 0, 0.2);
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #22c55e;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.error {
-            background: #ef4444;
-        }
-
-        .status-dot.loading {
-            background: #f59e0b;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .last-update {
-            font-size: 10px;
-        }
-
-        .ticker-scroll-area {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-
         .ticker-wrapper {
             display: flex;
+            animation: scroll 60s linear infinite;
             will-change: transform;
         }
 
@@ -93,18 +46,6 @@
             white-space: nowrap;
             min-width: fit-content;
             gap: 8px;
-            cursor: pointer;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-            text-decoration: none;
-        }
-
-        .ticker-item:hover {
-            transform: scale(1.05);
-            opacity: 0.9;
-        }
-
-        .ticker-item:active {
-            transform: scale(0.98);
         }
 
         .coin-icon {
@@ -194,24 +135,6 @@
             color: #fff;
             font-size: 14px;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
 
         @keyframes scroll {
@@ -222,376 +145,79 @@
                 transform: translateX(-50%);
             }
         }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .ticker-container {
-                height: 80px;
-            }
-
-            .ticker-item {
-                padding: 0 20px;
-                gap: 6px;
-            }
-
-            .coin-icon {
-                width: 28px;
-                height: 28px;
-                font-size: 16px;
-            }
-
-            .coin-name {
-                font-size: 12px;
-            }
-
-            .coin-symbol {
-                font-size: 10px;
-            }
-
-            .coin-price {
-                font-size: 13px;
-            }
-
-            .coin-change {
-                font-size: 11px;
-                padding: 2px 6px;
-                margin-left: 8px;
-            }
-
-            .ticker-header {
-                padding: 3px 12px;
-                font-size: 9px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .ticker-container {
-                height: 70px;
-            }
-
-            .ticker-item {
-                padding: 0 15px;
-                gap: 5px;
-            }
-
-            .coin-icon {
-                width: 24px;
-                height: 24px;
-                font-size: 14px;
-            }
-
-            .coin-name {
-                font-size: 11px;
-            }
-
-            .coin-symbol {
-                font-size: 9px;
-                padding: 1px 4px;
-            }
-
-            .coin-price {
-                font-size: 12px;
-            }
-
-            .coin-change {
-                font-size: 10px;
-                padding: 1px 5px;
-                margin-left: 6px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="ticker-container">
-        <div class="ticker-header">
-            <div class="connection-status">
-                <div class="status-dot loading" id="statusDot"></div>
-                <span id="statusText">Připojování...</span>
-            </div>
-            <div class="last-update" id="lastUpdate">Nikdy</div>
-        </div>
-        <div class="ticker-scroll-area">
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <span>Načítám data z Home Assistant...</span>
-            </div>
-            <div class="ticker-wrapper" id="ticker" style="display: none;"></div>
-        </div>
+        <div class="loading" id="loading">Načítám data z Home Assistant...</div>
+        <div class="ticker-wrapper" id="ticker" style="display: none;"></div>
     </div>
 
  <script>
-    // ==================== KONFIGURACE ====================
-
-    // 1. URL ADRESA HOME ASSISTANT
-    // Změňte na IP adresu vašeho Home Assistant serveru
-    // Příklady: "http://192.168.1.100:8123" nebo "http://homeassistant.local:8123"
-    const HA_URL = "http://192.168.1.1:8123";
-
-    // 2. LONG-LIVED ACCESS TOKEN
-    // Jak získat token:
-    // 1) V Home Assistant klikněte na váš profil (vlevo dole)
-    // 2) Scrollujte dolů na sekci "Long-Lived Access Tokens"
-    // 3) Klikněte "Create Token"
-    // 4) Pojmenujte token (např. "Crypto Ticker")
-    // 5) Zkopírujte vygenerovaný token a vložte níže (mezi uvozovky)
+    // Konfigurace
+    const HA_URL = "http://192.168.1.1:8123"; // tvoje IP HA
+    const UPDATE_INTERVAL = 10000; // Aktualizace každých 10 sekund
     const HA_TOKEN = "Tvoje dlouhodobé API token";
 
-    // 3. DALŠÍ NASTAVENÍ
-    const UPDATE_INTERVAL = 10000; // Aktualizace každých 10 sekund (ms)
-    const SCROLL_SPEED = 60; // Rychlost scrollování v sekundách (vyšší = pomalejší)
-    const MAX_RETRIES = 3; // Maximální počet pokusů při chybě
-    const RETRY_DELAY = 2000; // Zpoždění mezi pokusy (ms)
-
-    // Řazení kryptoměn:
-    // 'default' - původní pořadí
-    // 'price-desc' - podle ceny sestupně
-    // 'price-asc' - podle ceny vzestupně
-    // 'change-desc' - podle změny sestupně (největší růst)
-    // 'change-asc' - podle změny vzestupně (největší pokles)
-    // 'name' - abecedně podle názvu
-    const SORT_BY = 'default';
-    // ====================================================
-
     const COINS = [
-        // Top kryptoměny
-        { ha_name: 'bitcoin', icon: '₿', name: 'Bitcoin', coingecko_id: 'bitcoin' },
-        { ha_name: 'ethereum', icon: 'Ξ', name: 'Ethereum', coingecko_id: 'ethereum' },
-        { ha_name: 'solana', icon: '◎', name: 'Solana', coingecko_id: 'solana' },
-        { ha_name: 'cardano', icon: '₳', name: 'Cardano', coingecko_id: 'cardano' },
-        { ha_name: 'ripple', icon: '✕', name: 'Ripple', coingecko_id: 'ripple' },
-        { ha_name: 'avalanche', icon: '▲', name: 'Avalanche', coingecko_id: 'avalanche-2' },
-        { ha_name: 'chainlink', icon: '🔗', name: 'Chainlink', coingecko_id: 'chainlink' },
-        { ha_name: 'dogecoin', icon: 'Ð', name: 'Dogecoin', coingecko_id: 'dogecoin' },
-
-        // Altcoiny a DeFi projekty (mimo top 20)
-        { ha_name: 'the_graph', icon: '🔺', name: 'The Graph', coingecko_id: 'the-graph' },
-        { ha_name: 'cosmos', icon: '☀️', name: 'Cosmos', coingecko_id: 'cosmos' },
-        { ha_name: 'thorchain', icon: '⚡', name: 'THORChain', coingecko_id: 'thorchain' },
-        { ha_name: 'balancer', icon: '🅱️', name: 'Balancer', coingecko_id: 'balancer' },
-        { ha_name: 'kava', icon: '🟦', name: 'Kava', coingecko_id: 'kava' },
-        { ha_name: 'kusama', icon: '🟪', name: 'Kusama', coingecko_id: 'kusama' },
-        { ha_name: 'neo', icon: '🟢', name: 'NEO', coingecko_id: 'neo' },
-        { ha_name: 'eos', icon: '⬛', name: 'EOS', coingecko_id: 'eos' },
-
-        // Meme coiny
-        { ha_name: 'shiba_inu', icon: '🐕', name: 'SHIBA INU', coingecko_id: 'shiba-inu' },
-        { ha_name: 'floki', icon: '🐕', name: 'FLOKI', coingecko_id: 'floki' },
-        { ha_name: 'bonk', icon: '🐶', name: 'Bonk', coingecko_id: 'bonk' },
-        { ha_name: 'pepe', icon: '🐸', name: 'Pepe', coingecko_id: 'pepe' },
-
-        // Nové a emerging projekty
-        { ha_name: 'sui', icon: '🔷', name: 'Sui', coingecko_id: 'sui' },
-        { ha_name: 'aptos', icon: '🔶', name: 'Aptos', coingecko_id: 'aptos' },
-        { ha_name: 'sei', icon: '🌊', name: 'Sei', coingecko_id: 'sei-network' },
-        { ha_name: 'celestia', icon: '🌌', name: 'Celestia', coingecko_id: 'celestia' },
-        { ha_name: 'injective', icon: '💉', name: 'Injective', coingecko_id: 'injective-protocol' },
-
-        // Layer 2 a scaling
-        { ha_name: 'arbitrum', icon: '🔵', name: 'Arbitrum', coingecko_id: 'arbitrum' },
-        { ha_name: 'optimism', icon: '🔴', name: 'Optimism', coingecko_id: 'optimism' },
-        { ha_name: 'polygon', icon: '🟣', name: 'Polygon', coingecko_id: 'matic-network' },
-
-        // DeFi a další projekty
-        { ha_name: 'uniswap', icon: '🦄', name: 'Uniswap', coingecko_id: 'uniswap' },
-        { ha_name: 'aave', icon: '👻', name: 'Aave', coingecko_id: 'aave' },
-        { ha_name: 'maker', icon: '🏛️', name: 'Maker', coingecko_id: 'maker' },
-        { ha_name: 'curve', icon: '🌀', name: 'Curve DAO', coingecko_id: 'curve-dao-token' },
-        { ha_name: 'synthetix', icon: '⚗️', name: 'Synthetix', coingecko_id: 'synthetix-network-token' },
-        { ha_name: 'compound', icon: '🏦', name: 'Compound', coingecko_id: 'compound-governance-token' },
-
-        // Gaming a metaverse
-        { ha_name: 'axie_infinity', icon: '🎮', name: 'Axie Infinity', coingecko_id: 'axie-infinity' },
-        { ha_name: 'decentraland', icon: '🏙️', name: 'Decentraland', coingecko_id: 'decentraland' },
-        { ha_name: 'sandbox', icon: '🏖️', name: 'The Sandbox', coingecko_id: 'the-sandbox' },
-        { ha_name: 'immutable', icon: '🛡️', name: 'Immutable X', coingecko_id: 'immutable-x' },
-
-        // Ostatní zajímavé projekty
-        { ha_name: 'bitTorrent', icon: '🎵', name: 'BitTorrent', coingecko_id: 'bittorrent' },
-        { ha_name: 'bella_protocol', icon: '🟫', name: 'Bella Protocol', coingecko_id: 'bella-protocol' },
-        { ha_name: 'ocean_protocol', icon: '🌊', name: 'Ocean Protocol', coingecko_id: 'ocean-protocol' },
-        { ha_name: 'render', icon: '🎨', name: 'Render', coingecko_id: 'render-token' },
-        { ha_name: 'fetch_ai', icon: '🤖', name: 'Fetch.ai', coingecko_id: 'fetch-ai' },
-        { ha_name: 'singularitynet', icon: '🧠', name: 'SingularityNET', coingecko_id: 'singularitynet' },
-
-        // Fan tokeny
-        { ha_name: 'paris_saint_germain_fan_token', icon: '⚽', name: 'PSG Fan Token', coingecko_id: 'paris-saint-germain-fan-token' },
-        { ha_name: 'barcelona_fan_token', icon: '⚽', name: 'Barcelona Fan Token', coingecko_id: 'fc-barcelona-fan-token' },
-        { ha_name: 'juventus_fan_token', icon: '⚽', name: 'Juventus Fan Token', coingecko_id: 'juventus-fan-token' }
+        { ha_name: 'balancer', icon: '🅱️', name: 'Balancer' },
+        { ha_name: 'kava', icon: '🟦', name: 'Kava' },
+        { ha_name: 'neo', icon: '🟢', name: 'NEO' },
+        { ha_name: 'the_graph', icon: '🔺', name: 'The Graph' },
+        { ha_name: 'floki', icon: '🐕', name: 'FLOKI' },
+        { ha_name: 'dogecoin', icon: 'Ð', name: 'Dogecoin' },
+        { ha_name: 'ripple', icon: '✕', name: 'Ripple' },
+        { ha_name: 'ethereum', icon: 'Ξ', name: 'Ethereum' },
+        { ha_name: 'cardano', icon: '₳', name: 'Cardano' },
+        { ha_name: 'avalanche', icon: '▲', name: 'Avalanche' },
+        { ha_name: 'solana', icon: '◎', name: 'Solana' },
+        { ha_name: 'chainlink', icon: '🔗', name: 'Chainlink' },
+        { ha_name: 'kusama', icon: '🟪', name: 'Kusama' },
+        { ha_name: 'cosmos', icon: '☀️', name: 'Cosmos' },
+        { ha_name: 'eos', icon: '⬛', name: 'EOS' },
+        { ha_name: 'ftx_token', icon: '🔹', name: 'FTX Token' },
+        { ha_name: 'bella_protocol', icon: '🟫', name: 'Bella Protocol' },
+        { ha_name: 'shiba_inu', icon: '🐕', name: 'SHIBA INU' },
+        { ha_name: 'bonk', icon: '🐶', name: 'Bonk' },
+        { ha_name: 'sui', icon: '🔷', name: 'Sui' },
+        { ha_name: 'thorchain', icon: '⚡', name: 'THORChain' },
+        { ha_name: 'bitcoin', icon: '₿', name: 'Bitcoin' },
+        { ha_name: 'bitTorrent', icon: '🎵', name: 'BitTorrent' },
+        { ha_name: 'paris_saint_germain_fan_token', icon: '⚽', name: 'Paris Saint-Germain Fan Token' }
     ];
 
-    // Globální proměnné
-    let retryCount = 0;
-
-    // Pomocné funkce
-    function updateStatus(status, text) {
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-
-        statusDot.className = `status-dot ${status}`;
-        statusText.textContent = text;
-    }
-
-    function updateLastUpdateTime() {
-        const lastUpdate = document.getElementById('lastUpdate');
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        lastUpdate.textContent = `Poslední aktualizace: ${hours}:${minutes}:${seconds}`;
-    }
-
-    function sortCoins(coins) {
-        if (SORT_BY === 'default') return coins;
-
-        const sorted = [...coins];
-
-        switch (SORT_BY) {
-            case 'price-desc':
-                return sorted.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-            case 'price-asc':
-                return sorted.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-            case 'change-desc':
-                return sorted.sort((a, b) => parseFloat(b.change) - parseFloat(a.change));
-            case 'change-asc':
-                return sorted.sort((a, b) => parseFloat(a.change) - parseFloat(b.change));
-            case 'name':
-                return sorted.sort((a, b) => a.name.localeCompare(b.name));
-            default:
-                return sorted;
-        }
-    }
-
-    async function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    async function fetchWithRetry(url, options, attempt = 1) {
-        try {
-            const response = await fetch(url, options);
-            return response;
-        } catch (error) {
-            if (attempt < MAX_RETRIES) {
-                console.warn(`⚠️ Pokus ${attempt}/${MAX_RETRIES} selhal, zkouším znovu za ${RETRY_DELAY}ms...`);
-                await sleep(RETRY_DELAY);
-                return fetchWithRetry(url, options, attempt + 1);
-            }
-            throw error;
-        }
-    }
-
     async function fetchHAData() {
-        // Kontrola konfigurace před načítáním
-        if (HA_URL === "http://192.168.1.1:8123") {
-            console.error('⚠️ VAROVÁNÍ: HA_URL je stále na výchozí hodnotě. Změňte ji na IP adresu vašeho Home Assistant!');
-            updateStatus('error', 'Chyba konfigurace - zkontrolujte HA_URL');
-        }
-
-        if (HA_TOKEN === "Tvoje dlouhodobé API token") {
-            console.error('⚠️ VAROVÁNÍ: HA_TOKEN není nastaven. Vložte svůj Long-Lived Access Token!');
-            updateStatus('error', 'Chyba konfigurace - zkontrolujte HA_TOKEN');
-        }
-
         try {
-            updateStatus('loading', 'Načítám data...');
             const data = [];
-            let authError = false;
-            let firstErrorLogged = false;
 
             for (const coin of COINS) {
                 const entity_id = `sensor.crypto_${coin.ha_name}`;
                 const url = `${HA_URL}/api/states/${entity_id}`;
 
-                try {
-                    const response = await fetchWithRetry(url, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${HA_TOKEN}`,
-                            'Content-Type': 'application/json'
-                        }
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${HA_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const state = await response.json();
+                    data.push({
+                        ...coin,
+                        price: state.state,
+                        change: state.attributes.change_24h || 0,
+                        symbol: state.attributes.symbol || coin.ha_name.toUpperCase()
                     });
-
-                    if (response.ok) {
-                        const state = await response.json();
-                        data.push({
-                            ...coin,
-                            price: state.state,
-                            change: state.attributes.change_24h || 0,
-                            symbol: state.attributes.symbol || coin.ha_name.toUpperCase()
-                        });
-                    } else {
-                        // Detailní chybové zprávy podle HTTP status kódu
-                        if (!firstErrorLogged) {
-                            if (response.status === 401) {
-                                console.error('🔐 CHYBA AUTENTIZACE (401): Neplatný nebo chybějící token!');
-                                console.error('➡️ Zkontrolujte, zda:');
-                                console.error('   1. Máte správný Long-Lived Access Token z Home Assistant');
-                                console.error('   2. Token není expirovaný');
-                                console.error('   3. Token je správně zkopírovaný (bez mezer)');
-                                updateStatus('error', 'Chyba autentizace - neplatný token');
-                                authError = true;
-                            } else if (response.status === 403) {
-                                console.error('🚫 CHYBA OPRÁVNĚNÍ (403): Token nemá dostatečná oprávnění!');
-                                updateStatus('error', 'Chyba oprávnění');
-                                authError = true;
-                            } else if (response.status === 404) {
-                                console.warn(`❌ Sensor ${entity_id} nenalezen (404) - zkontrolujte, zda máte nainstalovanou integraci Crypto Info`);
-                            } else if (response.status >= 500) {
-                                console.error(`⚠️ CHYBA SERVERU (${response.status}): Home Assistant server má problém`);
-                                updateStatus('error', 'Chyba serveru HA');
-                            } else {
-                                console.warn(`❌ Sensor ${entity_id} - HTTP status: ${response.status}`);
-                            }
-                            firstErrorLogged = true;
-                        }
-                    }
-                } catch (error) {
-                    if (!firstErrorLogged) {
-                        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                            console.error('🌐 CHYBA SÍTĚ: Nelze se připojit k Home Assistant');
-                            console.error('➡️ Zkontrolujte, zda:');
-                            console.error('   1. Home Assistant běží a je dostupný');
-                            console.error('   2. URL adresa je správná (zkuste otevřít v prohlížeči)');
-                            console.error('   3. Není blokováno firewallem');
-                            console.error('   4. CORS je správně nakonfigurován v Home Assistant');
-                            console.error(`   Aktuální URL: ${HA_URL}`);
-                            updateStatus('error', 'Chyba připojení k HA');
-                        } else {
-                            console.error(`❌ Neočekávaná chyba při načítání ${entity_id}:`, error.message);
-                        }
-                        firstErrorLogged = true;
-                    }
-                }
-
-                // Přerušit smyčku při autentizační chybě (nemá smysl zkoušet další)
-                if (authError) {
-                    console.error('⛔ Zastavuji načítání kvůli chybě autentizace');
-                    break;
-                }
-            }
-
-            if (data.length > 0) {
-                updateStatus('', 'Připojeno');
-                retryCount = 0;
-                console.log(`✅ Úspěšně načteno ${data.length} kryptoměn`);
-            } else {
-                updateStatus('error', 'Žádná data');
-                if (!authError) {
-                    console.warn('⚠️ Žádné kryptoměny nebyly načteny. Zkontrolujte konzoli pro detaily.');
+                } else {
+                    console.warn(`❌ Sensor ${entity_id} nenalezen`);
                 }
             }
 
             return data;
         } catch (error) {
-            console.error('💥 Kritická chyba při načítání dat z HA:', error);
-            updateStatus('error', 'Kritická chyba');
-            retryCount++;
-
-            if (retryCount < MAX_RETRIES) {
-                console.log(`🔄 Zkouším znovu za ${RETRY_DELAY}ms... (pokus ${retryCount + 1}/${MAX_RETRIES})`);
-                await sleep(RETRY_DELAY);
-                return fetchHAData();
-            }
-
+            console.error('💥 Chyba při načítání dat z HA:', error);
             return null;
         }
     }
@@ -599,12 +225,9 @@
     function createTickerItem(coin) {
         const change = parseFloat(coin.change);
         const isPositive = change >= 0;
-        const coingeckoUrl = coin.coingecko_id
-            ? `https://www.coingecko.com/en/coins/${coin.coingecko_id}`
-            : `https://www.coingecko.com/en/search?query=${encodeURIComponent(coin.name)}`;
 
         return `
-            <a href="${coingeckoUrl}" target="_blank" class="ticker-item">
+            <div class="ticker-item">
                 <div class="coin-icon">${coin.icon}</div>
                 <div class="coin-info">
                     <div class="coin-header">
@@ -617,7 +240,7 @@
                     <span class="arrow ${isPositive ? 'arrow-up' : 'arrow-down'}"></span>
                     ${Math.abs(change).toFixed(2)}%
                 </span>
-            </a>
+            </div>
         `;
     }
 
@@ -628,37 +251,21 @@
         const loading = document.getElementById('loading');
 
         if (!data || data.length === 0) {
-            loading.innerHTML = `
-                <div class="spinner"></div>
-                <span>Žádná data nedostupná z Home Assistant. Zkouším znovu...</span>
-            `;
+            loading.innerText = "Žádná data nedostupná z Home Assistant.";
             console.warn('⚠️ Žádná data');
             return;
         }
 
-        // Seřazení dat podle nastavení
-        const sortedData = sortCoins(data);
-
-        // Vytvoření HTML pro ticker
-        const tickerHTML = sortedData.map(coin => createTickerItem(coin)).join('');
+        const tickerHTML = data.map(coin => createTickerItem(coin)).join('');
         ticker.innerHTML = tickerHTML + tickerHTML; // duplikace pro nekonečnou smyčku
 
-        // Nastavení dynamické rychlosti animace
-        ticker.style.animation = `scroll ${SCROLL_SPEED}s linear infinite`;
-
-        // Zobrazení tickeru a skrytí loading obrazovky
         loading.style.display = 'none';
         ticker.style.display = 'flex';
 
-        // Aktualizace času poslední aktualizace
-        updateLastUpdateTime();
-
-        console.log(`✅ Ticker aktualizován s ${data.length} kryptoměnami`);
+        console.log('✅ Ticker aktualizován');
     }
 
     // Spustit první načtení
-    console.log('🚀 Crypto Ticker se spouští...');
-    console.log(`⚙️ Konfigurace: UPDATE_INTERVAL=${UPDATE_INTERVAL}ms, SCROLL_SPEED=${SCROLL_SPEED}s, SORT_BY=${SORT_BY}`);
     updateTicker();
 
     // Pravidelné obnovování
